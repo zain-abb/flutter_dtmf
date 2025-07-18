@@ -1,38 +1,28 @@
 package com.eopeter.flutter_dtmf
+
 import android.content.Context
 import android.media.ToneGenerator
 import android.media.AudioManager
 import android.provider.Settings
 import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 
 class DtmfPlugin : FlutterPlugin, MethodCallHandler {
 
+    private var channel: MethodChannel? = null
+    private lateinit var applicationContext: Context
+    private lateinit var audioManager: AudioManager
+
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        setUpChannels(binding.binaryMessenger)
         applicationContext = binding.applicationContext
         audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    }
-
-    companion object {
-        var channel: MethodChannel? = null
-        private lateinit var applicationContext: Context
-        private lateinit var audioManager: AudioManager
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            setUpChannels(registrar.messenger())
-        }
-        fun setUpChannels(messenger: BinaryMessenger) {
-            channel = MethodChannel(messenger, "flutter_dtmf")
-            channel?.setMethodCallHandler(DtmfPlugin())
-        }
+        channel = MethodChannel(binding.binaryMessenger, "flutter_dtmf")
+        channel?.setMethodCallHandler(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -102,7 +92,6 @@ class DtmfPlugin : FlutterPlugin, MethodCallHandler {
         // Adjust volume using AudioManager
         var toneGenerator = ToneGenerator(streamType, targetVolume.toInt())
 
-
         Thread(object : Runnable {
             override fun run() {
                 for (i in digits.indices) {
@@ -138,10 +127,9 @@ class DtmfPlugin : FlutterPlugin, MethodCallHandler {
 
         return -1
     }
+
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel?.setMethodCallHandler(null)
         channel = null
     }
-
-
 }
