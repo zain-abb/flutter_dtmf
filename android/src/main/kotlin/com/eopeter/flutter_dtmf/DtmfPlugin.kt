@@ -1,12 +1,10 @@
 package com.eopeter.flutter_dtmf
-
 import android.content.Context
 import android.media.ToneGenerator
 import android.media.AudioManager
 import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -91,6 +89,7 @@ class DtmfPlugin : FlutterPlugin, MethodCallHandler {
         audioManager.setStreamVolume(streamType, targetVolume.toInt(), 0)
         // Adjust volume using AudioManager
         var toneGenerator = ToneGenerator(streamType, targetVolume.toInt())
+
 
         Thread(object : Runnable {
             override fun run() {
